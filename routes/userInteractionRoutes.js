@@ -17,28 +17,27 @@ router.post('/follow/:userId', authenticateToken, async (req, res) => {
         }
 
         //if trying to follow urself (...seriously??)
-        if(req.params.userId == req.user._id) {
+        if(req.params.userId == req.user.id) {
             return res.status(422).send('Cannot follow yourself');
         }
 
         //if already following the blogger
-        console.log(bloggerToFollow.followers);
-        if (bloggerToFollow.followers.includes(req.user._id)) { //_id gives objectid type, .id gives string
+        if (bloggerToFollow.followers.includes(req.user.id)) { //_id gives objectid type, .id gives string
             return res.status(422).send('You are already following this blogger');
         }
 
         //update the followers list
-        bloggerToFollow.followers.push(req.user._id);
+        bloggerToFollow.followers.push(req.user.id);
 
         //constructing notification
         let notifString = req.user.username + " just followed you!";
 
         //new notif object
         const notification = new Notification({
-            user: bloggerToFollow._id,
+            user: bloggerToFollow.id,
             type: 'follower',
             details: {
-                follower: req.user._id,
+                follower: req.user.id,
             },
             notifText: notifString,
         });
@@ -85,16 +84,16 @@ router.post('/unfollow/:userId', authenticateToken, async (req, res) => {
 
          //new notif object
          const notification = new Notification({
-            user: bloggerToFollow._id,
+            user: bloggerToUnfollow.id,
             type: 'follower',
             details: {
-                follower: req.user._id,
+                follower: req.user.id,
             },
             notifText: notifString,
         });
         await notification.save(); //saving in db
         
-        bloggerToFollow.notifications.push(notification);
+        bloggerToUnfollow.notifications.push(notification);
 
         await bloggerToUnfollow.save();//update in db
 

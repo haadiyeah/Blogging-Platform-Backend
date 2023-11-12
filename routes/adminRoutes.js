@@ -1,5 +1,3 @@
-// routes/adminRoutes.js
-
 const express = require('express');
 const router = express.Router();
 const authenticateToken = require('../middleware/authenticateToken');
@@ -8,7 +6,7 @@ const User = require('../models/User');
 const Blog = require('../models/Blog');
 
 //admin dashboard (default)
-router.get('/users', authenticateToken, authenticateAdmin, async (req, res) => {
+router.get('/', authenticateToken, authenticateAdmin, async (req, res) => {
     //if it got here, it passed admin authentication. congrats!
     res.status(200).send('Admin Dashboard');
 });
@@ -33,6 +31,14 @@ router.put('/block/:userId', authenticateToken, authenticateAdmin, async (req, r
             return res.status(404).send('User not found');
         }
 
+        if(user.isBlocked) {
+            return res.status(422).send('User is already blocked')
+        }
+
+        if(user.role == 'admin') {
+            return res.status(422).send('Cannot block an admin');
+        }
+
         user.isBlocked = true;
         await user.save();
 
@@ -40,6 +46,28 @@ router.put('/block/:userId', authenticateToken, authenticateAdmin, async (req, r
     } catch (error) {
         console.error(error);
         res.status(500).send('Error blocking user');
+    }
+});
+
+//route to unblock a user
+router.put('/unblock/:userId', authenticateToken, authenticateAdmin, async (req, res) => {
+    try {
+        const user = await User.findById(req.params.userId);
+        if (!user) {
+            return res.status(404).send('User not found');
+        }
+
+        if(user.isBlocked==false) {
+            return res.status(422).send('User is already unblocked')
+        }
+
+        user.isBlocked = false;
+        await user.save();
+
+        res.status(200).send('User unblocked successfully');
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Error unblocking user');
     }
 });
 
@@ -62,7 +90,8 @@ router.get('/blogPosts/:blogId', authenticateToken, authenticateAdmin, async (re
             return res.status(404).send('Blog post not found');
         }
 
-        res.json(blogPost);
+        //send blog post in JSON form
+        res.status(200).json(blogPost);
     } catch (error) {
         console.error(error);
         res.status(500).send('Error retrieving blog post');
@@ -77,6 +106,10 @@ router.put('/disableBlog/:blogId', authenticateToken, authenticateAdmin, async (
             return res.status(404).send('Blog post not found');
         }
 
+        if(blog.isVisible == false) {
+            return res.status(422).send('Blog post is already disabled')
+        }
+
         blog.isVisible = false;
         await blog.save();
 
@@ -84,6 +117,28 @@ router.put('/disableBlog/:blogId', authenticateToken, authenticateAdmin, async (
     } catch (error) {
         console.error(error);
         res.status(500).send('Error hiding blog post');
+    }
+});
+
+//enable a blog to be visible to users again.
+router.put('/enableBlog/:blogId', authenticateToken, authenticateAdmin, async (req, res) => {
+    try {
+        const blog = await Blog.findById(req.params.blogId);
+        if (!blog) {
+            return res.status(404).send('Blog post not found');
+        }
+
+        if(blog.isVisible) {
+            return res.status(422).send('Blog post is already enabled')
+        }
+
+        blog.isVisible = true;
+        await blog.save();
+
+        res.status(200).send('Blog post enabled & made visible successfully');
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Error in making blog post enabled');
     }
 });
 

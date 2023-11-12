@@ -77,8 +77,8 @@ router.get('/', async (req, res) => {
       sortOptions[sortBy] = sortvalue; //setting attribute of sortOptions object, for example { title: 1 }, acts as mongodb query
     }
 
-    console.log(" * * * * * * * * * QUERY * * * * * * *  * *");
-    console.log(query);
+    // console.log(" * * * * * * * * * QUERY * * * * * * *  * *");
+    // console.log(query);
 
     //find blogs which match
     //use "await" to make sure whole query executes before assigning
