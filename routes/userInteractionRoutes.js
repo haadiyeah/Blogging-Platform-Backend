@@ -4,7 +4,7 @@ const authenticateToken = require('../middleware/authenticateToken');
 //getting other modeels
 const User = require('../models/User');
 const Blog = require('../models/Blog');
-const Notification= require('../models/Notification');
+const Notification = require('../models/Notification');
 
 //endpoint to follow a blogger
 router.post('/follow/:userId', authenticateToken, async (req, res) => {
@@ -17,7 +17,7 @@ router.post('/follow/:userId', authenticateToken, async (req, res) => {
         }
 
         //if trying to follow urself (...seriously??)
-        if(req.params.userId == req.user.id) {
+        if (req.params.userId == req.user.id) {
             return res.status(422).send('Cannot follow yourself');
         }
 
@@ -42,7 +42,7 @@ router.post('/follow/:userId', authenticateToken, async (req, res) => {
             notifText: notifString,
         });
         await notification.save(); //saving in db
-        
+
         bloggerToFollow.notifications.push(notification);
 
         await bloggerToFollow.save();//updating in db
@@ -72,18 +72,18 @@ router.post('/unfollow/:userId', authenticateToken, async (req, res) => {
 
         //if not following the blogger
         console.log(req.user.id);
-        if (! bloggerToUnfollow.followers.includes(req.user.id)) {
+        if (!bloggerToUnfollow.followers.includes(req.user.id)) {
             return res.status(422).send('You are not following this blogger');
         }
 
         //re-assigning  the follower list of blogger to unfollow
         bloggerToUnfollow.followers = bloggerToUnfollow.followers.filter(followerId => followerId != req.user.id);
 
-         //constructing notification
-         let notifString = req.user.username + " just unfollowed you!";
+        //constructing notification
+        let notifString = req.user.username + " just unfollowed you!";
 
-         //new notif object
-         const notification = new Notification({
+        //new notif object
+        const notification = new Notification({
             user: bloggerToUnfollow.id,
             type: 'follower',
             details: {
@@ -92,7 +92,7 @@ router.post('/unfollow/:userId', authenticateToken, async (req, res) => {
             notifText: notifString,
         });
         await notification.save(); //saving in db
-        
+
         bloggerToUnfollow.notifications.push(notification);
 
         await bloggerToUnfollow.save();//update in db
@@ -110,7 +110,7 @@ router.post('/unfollow/:userId', authenticateToken, async (req, res) => {
 router.get('/notifications', authenticateToken, async (req, res) => {
     try {
         //console.log(req.user.id);
-        const notifications = await Notification.find({ user: req.user.id }, 'type notifText details createdAt' )
+        const notifications = await Notification.find({ user: req.user.id }, 'type notifText details createdAt')
             .sort({ createdAt: -1 }) //sort by creation date in descending order
 
         res.status(200).json(notifications);
@@ -123,7 +123,7 @@ router.get('/notifications', authenticateToken, async (req, res) => {
 //get unread notifications
 router.get('/notifications/unread', authenticateToken, async (req, res) => {
     try {
-        const notifications = await Notification.find({ user: req.user.id , read: false},'type notifText details createdAt')
+        const notifications = await Notification.find({ user: req.user.id, read: false }, 'type notifText details createdAt')
             .sort({ createdAt: -1 }) //sort by creation date in descending order
 
         res.status(200).json(notifications);
@@ -159,12 +159,12 @@ router.get('/feed', authenticateToken, async (req, res) => {
         let userId = req.user._id;
 
         //Find bloggers whose followers array contains the user ID,i.e, the user follows them
-        let bloggers = await User.find({ followers: { $in: userId }});
+        let bloggers = await User.find({ followers: { $in: userId } });
         let bloggersIds = bloggers.map(blogger => blogger._id);//get their ids
 
         //Get blog posts from the followed bloggers
         const feed = await Blog.find({ owner: { $in: bloggersIds } })
-            .sort({ createdAt: -1 }) ; // Sort by creation date in descending order
+            .sort({ createdAt: -1 }); // Sort by creation date in descending order
 
         res.status(200).json(feed); //return feed in json form
     } catch (error) {

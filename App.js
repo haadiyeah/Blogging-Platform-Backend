@@ -7,12 +7,12 @@ app.use(bodyParser.json());
 //importing routes
 const userRoutes = require('./routes/userModuleRoutes');
 const blogRoutes = require('./routes/blogPostRoutes');
-const userInteractionRoutes = require('./routes/userInteractionRoutes'); 
-const adminRoutes = require('./routes/adminRoutes'); 
-const searchRoutes = require('./routes/searchRoutes'); 
+const userInteractionRoutes = require('./routes/userInteractionRoutes');
+const adminRoutes = require('./routes/adminRoutes');
+const searchRoutes = require('./routes/searchRoutes');
 
-//porttttt
-const port=3000;
+//portt
+const port = 3000;
 
 //DB connection
 mongoose.connect('mongodb://localhost:27017/blogDB');
@@ -33,5 +33,5 @@ app.use('/admin', adminRoutes);
 app.use('/search', searchRoutes);
 
 app.listen(port, () => {
-  console.log("Server is running, Listening on port " +port);
+  console.log("Server is running, Listening on port " + port);
 });

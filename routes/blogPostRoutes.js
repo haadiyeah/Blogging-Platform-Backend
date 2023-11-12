@@ -26,17 +26,17 @@ router.post('/new', authenticateToken, async (req, res) => {
 //retrieve a list of all blog posts with pagination and filtering
 router.get('/', async (req, res) => {
   try {
-    let titleProvided=true;
+    let titleProvided = true;
     const query = {}; //forming mongodb query
-    
+
     const { page = 1, limit = 10, sortBy, sortOrder, title, minRating, maxRating } = req.query;//info is sent in query parameters
     //default values=page 1, limit=10 per page
 
     const totalRecords = await Blog.countDocuments();
-    if(page && (page<1 || (page - 1) * limit > totalRecords)){ //request violates field constraints, no.of items to skip over>total records
+    if (page && (page < 1 || (page - 1) * limit > totalRecords)) { //request violates field constraints, no.of items to skip over>total records
       res.status(422).send('Illegal value of page encountered');
     }
-    if(limit && (limit<5 || limit>100 )) {
+    if (limit && (limit < 5 || limit > 100)) {
       res.status(422).send('Illegal value of limit encountered');
     }
 
@@ -50,29 +50,29 @@ router.get('/', async (req, res) => {
       query.averageRating = { ...query.averageRating, $lte: Number(maxRating) }; //mongodb operator for <= 
       //if this runs, in the end query will look like: { averageRating: { $gte: 3, $lte: 5 } }
     }
-   
+
     query.isVisible = true; //only display blog posts which are visible
 
     if (title) {
       //only assign, if not null
       query.title = { $regex: new RegExp(title, 'i') }; //regex allows to match the title, if provided in search
     } else {
-      titleProvided=false;
+      titleProvided = false;
     }
 
     const sortOptions = {};//empty js object
     const validSortOptions = ['title', 'averageRating', 'createdAt']; //it can be sorted asc/desc based on these
 
     //if sortBy is truthy value & one of the valid options
-    if (sortBy && validSortOptions.includes(sortBy)) { 
+    if (sortBy && validSortOptions.includes(sortBy)) {
       let sortvalue;
       // -1 indicates descending, else ascending
-      if(!sortOrder) {
-        sortvalue=1;//asc default
-      } else if(sortOrder==='desc') {
+      if (!sortOrder) {
+        sortvalue = 1;//asc default
+      } else if (sortOrder === 'desc') {
         sortvalue = -1;
-      } else { 
-        sortvalue=1;
+      } else {
+        sortvalue = 1;
       }
       sortOptions[sortBy] = sortvalue; //setting attribute of sortOptions object, for example { title: 1 }, acts as mongodb query
     }
@@ -83,10 +83,10 @@ router.get('/', async (req, res) => {
     //find blogs which match
     //use "await" to make sure whole query executes before assigning
     const blogs = await Blog.find(query)
-    .sort(sortOptions) //sort object
-    .skip((page - 1) * limit) //implements pagination by skipping over objects 
-    .limit(limit)
-    .exec();
+      .sort(sortOptions) //sort object
+      .skip((page - 1) * limit) //implements pagination by skipping over objects 
+      .limit(limit)
+      .exec();
 
     if (blogs.length === 0) {
       return res.status(404).send('No blogs found');
@@ -118,7 +118,7 @@ router.get('/:blogId', async (req, res) => {
 //update a blog post (only the owner can update)
 router.put('/:blogId', authenticateToken, async (req, res) => {
   try {
-    if(! req.params.blogId) {
+    if (!req.params.blogId) {
       //unprocessable entity!!
       return res.status(422).send('No blog ID was sent');
     }
@@ -133,11 +133,11 @@ router.put('/:blogId', authenticateToken, async (req, res) => {
     }
 
     //setting attributes of blog object , if provided (truthy value)
-    if(req.body.title) {
+    if (req.body.title) {
       blog.title = req.body.title;
     }
 
-    if(req.body.content) {
+    if (req.body.content) {
       blog.content = req.body.content;
     }
 
@@ -162,11 +162,11 @@ router.delete('/:blogId', authenticateToken, async (req, res) => {
       return res.status(403).send('Permission denied');
     }
 
-    await Blog.deleteOne({ id:req.params.blogId });//mongo query to delete
+    await Blog.deleteOne({ id: req.params.blogId });//mongo query to delete
 
     res.status(200).send('Blog post deleted successfully');
   } catch (error) {
-    console.log( error);
+    console.log(error);
     res.status(500).send('Error deleting the blog post');
   }
 });
@@ -180,7 +180,7 @@ router.post('/rate/:blogId', authenticateToken, async (req, res) => {
       return res.status(404).send('Blog post not found');//not found error status
     }
 
-    if(! req.body.rating) {
+    if (!req.body.rating) {
       return res.status(400).send('Rating not found');//status 400 for malformed request syntax
     }
 
@@ -191,7 +191,7 @@ router.post('/rate/:blogId', authenticateToken, async (req, res) => {
 
     //assuming rating is a number between 1 and 5
     const rating = parseInt(req.body.rating);
-    
+
     //invalid rating values
     if (!rating || isNaN(rating) || rating < 1 || rating > 5) {
       return res.status(400).send('Invalid rating'); //status 400 for malformed request syntax
@@ -199,7 +199,7 @@ router.post('/rate/:blogId', authenticateToken, async (req, res) => {
 
     //if the user has already rated this blog
     const existingRatingIndex = blog.ratings.findIndex( //Returns the index of the first element in the array where predicate is true
-      (rating) => rating.user.toString() === req.user.id 
+      (rating) => rating.user.toString() === req.user.id
     );
 
     // If the user has already rated, update their rating
@@ -217,21 +217,21 @@ router.post('/rate/:blogId', authenticateToken, async (req, res) => {
       blog.ratings.push(newRating);
     }
 
-     //Recalculate the average
-     const callbackFunc = (acc, rating) => acc + rating.value; //for reduce func, accumulate sum
-     let sum = blog.ratings.reduce(callbackFunc, 0); //reduce array to one value,i.e. sum of ratings; 0 is inital value(accumulator)
-     blog.averageRating = (sum / blog.ratings.length); //assign new value to sum
+    //Recalculate the average
+    const callbackFunc = (acc, rating) => acc + rating.value; //for reduce func, accumulate sum
+    let sum = blog.ratings.reduce(callbackFunc, 0); //reduce array to one value,i.e. sum of ratings; 0 is inital value(accumulator)
+    blog.averageRating = (sum / blog.ratings.length); //assign new value to sum
 
     //save in db
     await blog.save();
-    
+
     //success!!
     if (existingRatingIndex !== -1) {
       res.status(200).send('Your previous rating was updated successfully')
     } else {
       res.status(200).send('Your rating was added successfully');
     }
-  } 
+  }
   catch (error) {
     console.log(error);
     res.status(500).send('Error rating the blog post');
@@ -241,12 +241,12 @@ router.post('/rate/:blogId', authenticateToken, async (req, res) => {
 //endpoint to comment on a blog post
 router.post('/comment/:blogId', authenticateToken, async (req, res) => {
   try {
-    if(! req.params.blogId) {
+    if (!req.params.blogId) {
       return res.status(400).send('No blog ID was sent'); //malformed request
     }
 
     //for invalid comment values
-    if(!req.body || !req.body.text || req.body.text == "") {
+    if (!req.body || !req.body.text || req.body.text == "") {
       return res.status(400).send('No comment data was sent'); //malformed request
     }
     //get blog from db
@@ -265,7 +265,7 @@ router.post('/comment/:blogId', authenticateToken, async (req, res) => {
 
     //new comment notification
     //console.log("req user "+req.user.id);
-    let commentorName=req.user.username;
+    let commentorName = req.user.username;
     let notifString = commentorName + " just commented on your post! ";
 
     //notif object
@@ -291,7 +291,7 @@ router.post('/comment/:blogId', authenticateToken, async (req, res) => {
 
     //success
     res.status(200).send('Commented successfully');
-  } 
+  }
   catch (error) {
     console.log(error);
     res.status(500).send('Error commenting on the blog post'); //status code for internal server error

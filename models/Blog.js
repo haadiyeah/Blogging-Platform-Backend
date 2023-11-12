@@ -40,7 +40,7 @@ const blogSchema = new mongoose.Schema({
     {
       user: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'User', 
+        ref: 'User',
         required: true,
       },
       text: {
@@ -54,7 +54,7 @@ const blogSchema = new mongoose.Schema({
     default: true,
   },
   categories: {
-    type: [String], 
+    type: [String],
     default: []
   },
 }, { timestamps: true });

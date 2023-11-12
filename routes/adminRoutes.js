@@ -31,11 +31,11 @@ router.put('/block/:userId', authenticateToken, authenticateAdmin, async (req, r
             return res.status(404).send('User not found');
         }
 
-        if(user.isBlocked) {
+        if (user.isBlocked) {
             return res.status(422).send('User is already blocked')
         }
 
-        if(user.role == 'admin') {
+        if (user.role == 'admin') {
             return res.status(422).send('Cannot block an admin');
         }
 
@@ -57,7 +57,7 @@ router.put('/unblock/:userId', authenticateToken, authenticateAdmin, async (req,
             return res.status(404).send('User not found');
         }
 
-        if(user.isBlocked==false) {
+        if (user.isBlocked == false) {
             return res.status(422).send('User is already unblocked')
         }
 
@@ -106,7 +106,7 @@ router.put('/disableBlog/:blogId', authenticateToken, authenticateAdmin, async (
             return res.status(404).send('Blog post not found');
         }
 
-        if(blog.isVisible == false) {
+        if (blog.isVisible == false) {
             return res.status(422).send('Blog post is already disabled')
         }
 
@@ -128,7 +128,7 @@ router.put('/enableBlog/:blogId', authenticateToken, authenticateAdmin, async (r
             return res.status(404).send('Blog post not found');
         }
 
-        if(blog.isVisible) {
+        if (blog.isVisible) {
             return res.status(422).send('Blog post is already enabled')
         }
 
