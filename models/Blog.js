@@ -49,6 +49,14 @@ const blogSchema = new mongoose.Schema({
       },
     },
   ],
+  isVisible: { //admin can change this property only
+    type: Boolean,
+    default: true,
+  },
+  categories: {
+    type: [String], 
+    default: []
+  },
 }, { timestamps: true });
 
 const Blog = mongoose.model('Blog', blogSchema);

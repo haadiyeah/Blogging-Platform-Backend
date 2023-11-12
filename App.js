@@ -1,25 +1,37 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
-const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken');
 const app = express();
+app.use(bodyParser.json());
 
-const User=require("./models/User");
+//importing routes
 const userRoutes = require('./routes/userModuleRoutes');
 const blogRoutes = require('./routes/blogPostRoutes');
-app.use(bodyParser.json());
+const userInteractionRoutes = require('./routes/userInteractionRoutes'); 
+const adminRoutes = require('./routes/adminRoutes'); 
+const searchRoutes = require('./routes/searchRoutes'); 
+
+//porttttt
+const port=3000;
 
 //DB connection
 mongoose.connect('mongodb://localhost:27017/blogDB');
 
-//all the routes for user module
+//Routes for user module
 app.use('/users', userRoutes);
-//all the routes for blog post management
+
+//Routes for blog post management
 app.use('/blogs', blogRoutes);
 
-//pooooooooooooooorrrt
-const port=3000;
+//Routes for user interaction
+app.use('/interaction', userInteractionRoutes);
+
+//Routes for admin
+app.use('/admin', adminRoutes);
+
+//Routes for search
+app.use('/search', searchRoutes);
+
 app.listen(port, () => {
-  console.log("Server is running, Listening on port 3000");
+  console.log("Server is running, Listening on port " +port);
 });
